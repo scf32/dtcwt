@@ -187,8 +187,8 @@ class slp2:
 
         # We use negative angles (and ADD the offset) 
         # because we are working in uv coordinates
-        ru = 0.5*np.cos(sb*(np.pi/(-6)) + np.pi/12) + 0.5
-        rv = 0.5*np.sin(sb*(np.pi/(-6)) + np.pi/12) + 0.5
+        ru = 0.5176*np.cos(sb*(np.pi/(-6)) + np.pi/12) + 0.5
+        rv = 0.5176*np.sin(sb*(np.pi/(-6)) + np.pi/12) + 0.5
 
         U = list(range(0,self.nlevels))
         V = list(range(0,self.nlevels))
@@ -224,6 +224,7 @@ class slp2:
         sbangle = (np.array([ np.pi/12, np.pi/4, 5*np.pi/12,
                              7*np.pi/12, 3*np.pi/4, 11*np.pi/12]))
         gamma = list(range(0, self.nlevels))
+        diffs = list(range(0, self.nlevels))
 
 
         transform = dtcwt.Transform2d('near_sym_b_bp', 'qshift_b_bp')
@@ -253,6 +254,7 @@ class slp2:
 
             # Conjugate multiply the samples in the upper half of the sampling circle with their counterparts in the lower half
             W = samples[0:Tfm.highpasses[level].shape[0],:,:]*np.conj(samples[Tfm.highpasses[level].shape[0]:,:,:])
+            diffs[level] = W
             # This is where the phase rotation takes place
             # Uncomment for the intermediate alpha value
             # alpha = np.abs(W)**(1 - (1/rotratio[level,:])) * W ** (1 / rotratio[level,:])
@@ -262,7 +264,7 @@ class slp2:
         if self.verbose:
             print("SLP2 coefficients computed.")
 
-        return gamma # Return our final "cell array" (list of numpy arrays).
+        return gamma, diffs # Return our final "cell array" (list of numpy arrays).
 
     def global_warp(self, slp2pyramid, Tfm, resample=True):
         # Initialise the returned list
