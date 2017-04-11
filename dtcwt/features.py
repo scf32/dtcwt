@@ -342,6 +342,7 @@ class slp2:
     
         # Begin loop over scales
         for level in range(self.firstlevel, len(gamma)):
+
             # Sorting and using only the 2 largest coefficients not implemented yet.
             udim = np.int(gamma[level].shape[0])
             vdim = np.int(gamma[level].shape[1])
@@ -534,10 +535,8 @@ class slp2:
                 print(repr(locs.shape[0]) + " keypoints were stable at level " + repr(k+1) + ".\n")
 
             # Eliminate keypoints with responses below the threshold
-            print(values)
-            print(kps[-1].shape)
             kps[-1] = kps[-1][values>threshold,:]
-            print(kps[-1].shape)
+
             if self.verbose:
                 print(repr(kps[-1].shape[0]) + " keypoints were above the threshold.\n")
 
@@ -660,7 +659,8 @@ def slp2interleaved(img, nlevels=5, full=True, firstlevel=1, plots=False, verbos
             sampleLocs[n] = s.init()
         
         # Actual slp operations
-        gamma[n] = s.transform(scaledImage, sampleLocs[n])
+        gamma[n], _ = s.transform(scaledImage, sampleLocs[n])
+        print(len(gamma[n]))
         hists[n] = s.histgen(gamma[n])
         if kpmethod == 'forshaw':
             print('Using Forshaw keypoint detector.')
