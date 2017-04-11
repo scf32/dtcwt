@@ -33,16 +33,6 @@ class slp2:
         else:
             self.firstlevel = firstlevel-1
 
-        # Copied/pasted from MATLAB, should regenerate these
-        # natively at some point.
-        # row index: transform level, column index: subband
-        self.rotratio = (np.multiply(-1,
-                        [[3.7962, 4.2812, 3.8327, 3.8327, 4.2812, 3.7962],
-                        [4.5437, 5.0473, 4.5336, 4.5336, 5.0473, 4.5437],
-                        [4.7176, 5.4489, 4.6981, 4.6981, 5.4489, 4.7176],
-                        [4.7651, 5.5655, 4.7443, 4.7443, 5.5655, 4.7651],
-                        [4.7692, 5.5909, 4.7507, 4.7507, 5.5909, 4.7692 ]]))
-
     def histnd(self, x, bins, wt=None):
         """Form an N-dimensional histogram of the list of N-vectors in x.
         x is an N by M matrix, where the number of vectors is M.
@@ -166,7 +156,7 @@ class slp2:
 
         return h  # binvecs is not returned
 
-    def init(self):
+    def init(self, samplingConfig='normal'):
         """This will calculate the appropriate sampling locations.
         Rather than guessing what the DTCWT will do with 
         the image (which could be any size), it will apply the DTCWT 
@@ -184,11 +174,43 @@ class slp2:
         # sampling locations. Not to be confused with the 'sb'
         # used elsewhere to loop over subbands.
         sb = np.array(list(range(1,13)))
+        
+        # Depending on the chosen sampling configuration, which may be 
+        # a circle of diameter 1 (normal) or ~1.035 for common locations
+        # across subbands (useful for SLP2 inversion).
+        if samplingConfig == 'normal':
+            radius = 0.5
+            # Standard circle sampling pattern, radius 0.5
+            # Copied/pasted from MATLAB, should regenerate these
+            # natively at some point.
+            # row index: transform level, column index: subband
+            self.rotratio = (np.multiply(-1,
+                        [[3.7962, 4.2812, 3.8327, 3.8327, 4.2812, 3.7962],
+                        [4.5437, 5.0473, 4.5336, 4.5336, 5.0473, 4.5437],
+                        [4.7176, 5.4489, 4.6981, 4.6981, 5.4489, 4.7176],
+                        [4.7651, 5.5655, 4.7443, 4.7443, 5.5655, 4.7651],
+                        [4.7692, 5.5909, 4.7507, 4.7507, 5.5909, 4.7692 ]]))
+            print('Using standard sampling configuration, circle radius 0.5.')
+            
+        if samplingConfig == 'extended':
+            radius = 0.5/np.cos(15*np.pi/180)
+            # These are to be used with the overlapping circle
+            # (i.e., dodecagon sampling pattern with common locations)
+            self.rotratio = np.array(
+             [[-3.5491,   -4.5718,   -3.5491,   -3.5483,   -4.5714,   -3.5483],
+              [-4.6794,   -4.9611,   -4.6794,   -4.6793,   -4.9558,   -4.6793],
+              [-4.8196,   -5.3754,   -4.8196,   -4.8197,   -5.3689,   -4.8197],
+              [-4.8543,   -5.4917,   -4.8543,   -4.8545,   -5.4850,   -4.8545],
+              [-4.8553,   -5.5172,   -4.8553,   -4.8555,   -5.5104,   -4.8555],
+              [-4.8502,   -5.5232,   -4.8502,   -4.8504,   -5.5163,   -4.8504],
+              [-4.8466,   -5.5246,   -4.8466,   -4.8468,   -5.5178,   -4.8468],
+              [-4.8445,   -5.5250,   -4.8445,   -4.8447,   -5.5182,   -4.8447]])
+            print('Using extended sampling configuration, circle radius ~1.035.')
 
         # We use negative angles (and ADD the offset) 
         # because we are working in uv coordinates
-        ru = 0.5176*np.cos(sb*(np.pi/(-6)) + np.pi/12) + 0.5
-        rv = 0.5176*np.sin(sb*(np.pi/(-6)) + np.pi/12) + 0.5
+        ru = radius*np.cos(sb*(np.pi/(-6)) + np.pi/12) + 0.5
+        rv = radius*np.sin(sb*(np.pi/(-6)) + np.pi/12) + 0.5
 
         U = list(range(0,self.nlevels))
         V = list(range(0,self.nlevels))
