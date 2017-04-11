@@ -2,7 +2,7 @@ import dtcwt
 import dtcwt.utils
 import numpy as np
 import dtcwt.sampling
-from matplotlib.pyplot import *
+#from matplotlib.pyplot import *
 # The following are required for image resizing
 import scipy
 from scipy import misc
